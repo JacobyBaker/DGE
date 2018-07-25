@@ -1,0 +1,130 @@
+
+#First, map to the de novo transcriptome you created earlier:
+#on khaleesi
+perl /opt/trinityrnaseq/util/align_and_estimate_abundance.pl \
+--transcripts /projects/rockfish/transcriptomics/EXP8_Scarn_larvae/Assembly_jb/Trinity/pH_and_Con-DO_Assembly/trinity_2sample_run_20180528.Trinity.fasta --seqType fq --prep_reference \
+--samples_file /projects/rockfish/transcriptomics/EXP8_Scarn_larvae/mapping/Gopher_samples_file.txt \
+--est_method RSEM --aln_method bowtie --trinity_mode \
+--output_dir RSEM_Gopher_Trinity_LT
+
+## on treebeard
+perl /opt/trinityrnaseq-Trinity-v2.4.0/util/align_and_estimate_abundance.pl \
+--transcripts /home/data/rockfish/EXP5_Scaur_Hypox_gill/JB_Work/work/assembly/trinity_EXP5_HypoxGills_20180607/trinity_EXP5_HypoxGills_20180607.Trinity.Fasta --seqType fq --prep_reference \
+--samples_file /home/data/rockfish/EXP5_Scaur_Hypox_gill/mapping/Exp5_Hypox_Gills_samples_file.txt /
+--est_method RSEM --aln_method bowtie --trinity_mode \
+--output_dir RSEM_EXP5_Copper_Trinity_LT
+
+
+
+
+## 1 Build Transcript and Gene Expression Matrices
+
+# for khaleesi (had to pull trinity.v2.4.0 from treebeard to run because the newer version requires the gene_trans_map function, but I couldn't get it to work)
+perl util/abundance_estimates_to_matrix.pl \
+--est_method RSEM \
+--name_sample_by_basedir \
+D1_Control_rep1/RSEM.genes.results D1_Control_rep2/RSEM.genes.results D1_Cross_rep1/RSEM.genes.results D1_Cross_rep2/RSEM.genes.results \
+D1_DO_rep1/RSEM.genes.results D1_DO_rep2/RSEM.genes.results D1_pH_rep1/RSEM.genes.results D1_pH_rep2/RSEM.genes.results \
+D5_Control_Control_rep1/RSEM.genes.results D5_Control_Control_rep2/RSEM.genes.results D5_Control_Cross_rep1/RSEM.genes.results \
+D5_Control_Cross_rep2/RSEM.genes.results D5_Control_DO_rep1/RSEM.genes.results D5_Control_DO_rep2/RSEM.genes.results \
+D5_Control_pH_rep1/RSEM.genes.results D5_Control_pH_rep2/RSEM.genes.results D5_Cross_Control_rep1/RSEM.genes.results \
+D5_Cross_Cross_rep1/RSEM.genes.results D5_Cross_Cross_rep2/RSEM.genes.results D5_Cross_DO_rep1/RSEM.genes.results \
+D5_Cross_pH_rep1/RSEM.genes.results D5_DO_Control_rep1/RSEM.genes.results D5_DO_Control_rep2/RSEM.genes.results \
+D5_DO_Cross_rep1/RSEM.genes.results D5_DO_Cross_rep2/RSEM.genes.results D5_DO_DO_rep1/RSEM.genes.results D5_DO_DO_rep2/RSEM.genes.results \
+D5_DO_pH_rep1/RSEM.genes.results D5_pH_Control_rep1/RSEM.genes.results D5_pH_Cross_rep1/RSEM.genes.results D5_pH_Cross_rep2/RSEM.genes.results \
+D5_pH_DO_rep1/RSEM.genes.results D5_pH_DO_rep2/RSEM.genes.results D5_pH_pH_rep1/RSEM.genes.results D5_pH_pH_rep2/RSEM.genes.results
+
+--gene_trans_map /projects/rockfish/transcriptomics/EXP8_Scarn_larvae/Assembly_jb/Trinity/pH_and_Con-DO_Assembly/trinity_2sample_run_20180528.Trinity.fasta.gene_trans_map \
+
+
+
+# For treebeard and Exp 5 hypox gills
+perl /opt/trinityrnaseq-Trinity-v2.4.0/util/abundance_estimates_to_matrix.pl \
+--est_method RSEM \
+--name_sample_by_basedir \
+Contr_8_rep1/RSEM.genes.results Contr_8_rep2/RSEM.genes.results Contr_8_rep3/RSEM.genes.results Contr_8_rep4/RSEM.genes.results Contr_8_rep5/RSEM.genes.results Contr_8_rep6/RSEM.genes.results Hypox_2_rep1/RSEM.genes.results Hypox_2_rep2/RSEM.genes.results Hypox_2_rep3/RSEM.genes.results Hypox_2_rep4/RSEM.genes.results Hypox_2_rep5/RSEM.genes.results Hypox_2_rep6/RSEM.genes.results Hypox_4_rep1/RSEM.genes.results Hypox_4_rep2/RSEM.genes.results Hypox_4_rep3/RSEM.genes.results Hypox_4_rep4/RSEM.genes.results Hypox_4_rep5/RSEM.genes.results Hypox_4_rep6/RSEM.genes.results Hypox_6_rep1/RSEM.genes.results Hypox_6_rep2/RSEM.genes.results Hypox_6_rep3/RSEM.genes.results Hypox_6_rep4/RSEM.genes.results Hypox_6_rep5/RSEM.genes.results Hypox_6_rep6/RSEM.genes.results
+
+
+## 2 Compare Replicates -
+#khaleesi Exp 8
+perl /opt/trinityrnaseq/Analysis/DifferentialExpression/PtR \
+--matrix matrix.counts.matrix \
+--samples /projects/rockfish/transcriptomics/EXP8_Scarn_larvae/mapping/Gopher_samples_file.txt --CPM --log2 \
+--min_rowSums 10 \
+--compare_replicates
+
+# treebeard Exp 5
+perl /opt/trinityrnaseq-Trinity-v2.4.0/Analysis/DifferentialExpression/PtR \
+--matrix matrix.counts.matrix \
+--samples /home/data/rockfish/EXP5_Scaur_Hypox_gill/mapping/Exp5_Hypox_Gills_samples_file.txt --CPM --log2 \
+--min_rowSums 10 \
+--compare_replicates
+
+
+## 3 Compare Replicates Across Samples
+#khaleesi Exp 8
+perl /opt/trinityrnaseq/Analysis/DifferentialExpression/PtR \
+--matrix matrix.counts.matrix \
+--min_rowSums 10 \
+-s /projects/rockfish/transcriptomics/EXP8_Scarn_larvae/mapping/Gopher_samples_file.txt \
+--log2 --CPM --sample_cor_matrix
+
+#Treebeard Exp 5
+perl /opt/trinityrnaseq-Trinity-v2.4.0/Analysis/DifferentialExpression/PtR \
+--matrix matrix.counts.matrix \
+--min_rowSums 10 \
+-s /home/data/rockfish/EXP5_Scaur_Hypox_gill/mapping/Exp5_Hypox_Gills_samples_file.txt \
+--log2 --CPM --sample_cor_matrix
+
+
+## 4 Generate PCA Plot
+#khaleesi Exp 8
+perl /opt/trinityrnaseq/Analysis/DifferentialExpression/PtR \
+--matrix matrix.counts.matrix \
+-s /projects/rockfish/transcriptomics/EXP8_Scarn_larvae/mapping/Gopher_samples_file.txt \
+--min_rowSums 10 --log2 \
+--CPM --center_rows \
+--prin_comp 3
+
+#Treebeard Exp 5
+perl /opt/trinityrnaseq-Trinity-v2.4.0/Analysis/DifferentialExpression/PtR \
+--matrix matrix.counts.matrix \
+-s /home/data/rockfish/EXP5_Scaur_Hypox_gill/mapping/Exp5_Hypox_Gills_samples_file.txt \
+--min_rowSums 10 --log2 \
+--CPM --center_rows \
+--prin_comp 3
+
+
+## 5 Run Differential Gene Expression Analysis with edgeR
+#khaleesi Exp 8
+perl /opt/trinityrnaseq/Analysis/DifferentialExpression/run_DE_analysis.pl  \
+--matrix matrix.counts.matrix \
+--method edgeR \
+--samples_file /projects/rockfish/transcriptomics/EXP8_Scarn_larvae/mapping/Gopher_samples_file.txt
+
+# Treebeard Exp 5
+perl /opt/trinityrnaseq-Trinity-v2.4.0/Analysis/DifferentialExpression/run_DE_analysis.pl  \
+--matrix matrix.counts.matrix \
+--method edgeR \
+--samples_file /home/data/rockfish/EXP5_Scaur_Hypox_gill/mapping/Exp5_Hypox_Gills_samples_file.txt
+
+
+## 6 Identify DE genes with p-val and fold change cut-off
+#khaleesi Exp 8 ~ must move into the edgeR directory
+perl /opt/trinityrnaseq/Analysis/DifferentialExpression/analyze_diff_expr.pl \
+--matrix /projects/rockfish/transcriptomics/EXP8_Scarn_larvae/mapping/matrix.TMM.EXPR.matrix \
+-P 0.001 \
+-C 2 \
+--samples /projects/rockfish/transcriptomics/EXP8_Scarn_larvae/mapping/Gopher_samples_file.txt
+
+# Treebeard Exp 5 ~ must move into the edgeR directory
+perl /opt/trinityrnaseq-Trinity-v2.4.0/Analysis/DifferentialExpression/analyze_diff_expr.pl \
+--matrix /home/data/rockfish/EXP5_Scaur_Hypox_gill/mapping/matrix.TMM.EXPR.matrix \
+-P 0.05 \
+-C 1 \
+--samples /home/data/rockfish/EXP5_Scaur_Hypox_gill/mapping/Exp5_Hypox_Gills_samples_file.txt
+
+
+## 7 Download edgeR output files to personal computer
+# Treebeard Exp 5
+scp bake1349@treebeard.csumb.edu:/home/data/rockfish/EXP5_Scaur_Hypox_gill/mapping/edgeR.51674.dir/*  /Users/jacobybaker/Documents/Logan_Lab/Copper_Hypoxia_EXP/edgeR.40768.dir  # also get samples file
