@@ -1,0 +1,68 @@
+---
+title: "NewTest"
+author: "Jacoby Baker"
+date: "8/8/2018"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r}
+library(tidyverse) # after install.packages('tidyverse')
+library(reshape2)  # afteinstall.packages('reshape2')
+library(ggplot2)   # after install.packages('ggplot2')
+library(ggdendro)   # after install.packages('ggdendro')
+
+setwd("/Users/jacobybaker/Documents/Logan_Lab/Gopher_Larvae_work/Day1_comparison")
+```
+
+load in the data and scale the data variables 
+```{r}
+data <- read.csv("gopher_larvae_dge_annotated.csv", header=TRUE)
+data <- data[,c(2,4:length(data))] # This is to extract only the swissprotID column and expression data
+df_data <- melt(data)
+heatmap.plot<-ggplot(data.long, aes(x=variable,y=swissprotID)) +
+  geom_tile(aes(fill = value)) +
+  scale_fill_gradient2(low="green", mid="black", high="red", midpoint=0,    limits=c(-2,2)) + # change color scale min/max
+  ylab("Genes") +
+  xlab("Treatment") +
+  ggtitle("Differential gene expression in gill tissue") +
+  theme(legend.title = element_text(size = 10),
+        legend.text = element_text(size = 12),
+        plot.title = element_text(size=10),
+        axis.title = element_text(size=14,face="bold"),
+        axis.text.x = element_text(angle = 90, hjust = 1))+
+  labs(fill = "Log2 Fold Change")
+
+print(heatmap.plot)
+```
+
+
+```{r}
+dat <- data[,2:9]  # include only the numerical columns
+rownames(dat) <- data[,1]
+row.order <- hclust(dist(dat))$order # clustering
+col.order <- hclust(dist(t(dat)))$order
+dat_new <- dat[row.order, col.order] # re-order matrix accoring to clustering
+
+df_molten_dat <- melt(as.matrix(dat_new)) # reshape into dataframe
+names(df_molten_dat)[c(1:2)] <- c("swissprotID", "treatment")
+
+ggplot(df_molten_dat, aes(x=treatment,y=swissprotID)) +
+  geom_tile(aes(fill = value)) +
+  scale_fill_gradient2(low="green", mid="black", high="red", midpoint=0,    limits=c(-2,2)) + # change color scale min/max
+  ylab("Genes") +
+  xlab("Treatment") +
+  ggtitle("Differential gene expression in Day 1 larval gopher rockfish") +
+  theme(legend.title = element_text(size = 10),
+        legend.text = element_text(size = 12),
+        plot.title = element_text(size=10),
+        axis.title = element_text(size=14,face="bold"),
+        axis.text.x = element_text(angle = 90, hjust = 1))+
+  labs(fill = "Log2 Fold Change")
+```
+
+
+
+
+
