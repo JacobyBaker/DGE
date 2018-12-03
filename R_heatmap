@@ -15,7 +15,7 @@ library(ggdendro)   # after install.packages('ggdendro')
 
 ```{r}
 #change the working directory to where the file is that you are going to use
-setwd("/Users/jacobybaker/Documents/Logan_Lab/Copper_Hypoxia_EXP/edgeR.40768.dir")
+setwd("/set/to/your/working/directory")
 getwd()
 
 ```
@@ -23,7 +23,7 @@ getwd()
 load in the data and scale the data variables 
 ```{r}
 #load in the data
-data <- read.csv("/Users/jacobybaker/Documents/Logan_Lab/Copper_Hypoxia_EXP/edgeR.40768.dir/copper_hypox_gill_all_comparison_dge_annotated.csv", header=TRUE)
+data <- read.csv("/path/to/your/file", header=TRUE)
 
 data <- data[,c(2,4:length(data))] # This is to extract only the swissprotID column and expression data. This could change depending on the format of the file
 df_data <- melt(data)
@@ -66,14 +66,14 @@ col.order <-c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23) #clus
 dat_new <- dat[row.order, col.order] # re-order matrix accoring to clustering
 
 clustered_dat <- melt(as.matrix(dat_new)) # reshape into dataframe
-names(clustered_dat)[c(1:2)] <- c("swissprotID", "treatment")
+names(clustered_dat)[c(1:2)] <- c("swissprotID", "treatment") #call the column names that you want to use
 clustered_dat
-g<-ggplot(clustered_dat, aes(x=treatment,y=swissprotID)) +
+g<-ggplot(clustered_dat, aes(x=treatment,y=swissprotID)) + #call the column names that you want to use
   geom_tile(aes(fill = value)) +
   scale_fill_gradient2(low="purple", mid="black", high="yellow", midpoint=0,    limits=c(-4,4)) + # change color scale min/max
   ylab("Genes") +
   xlab("Treatment") +
-  ggtitle("Copper hypoxia gills") +
+  ggtitle("Title your heatmap") +
   theme(legend.title = element_text(size = 10),
         legend.text = element_text(size = 12),
         plot.title = element_text(size=10),
@@ -86,6 +86,6 @@ g
 ```
 
 ```{r}
-ggsave("copper_hypoxia_gills_all_comparison_ordered_by_treatment.png",plot=g)
+ggsave("name.your.heat.map.png",plot=g)
 ```
 
